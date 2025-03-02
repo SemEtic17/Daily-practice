@@ -1,24 +1,11 @@
 import React, { useEffect, useState } from "react";
-import api from "../utils/api";
-import { Button } from "flowbite-react";
+import { useSelector } from "react-redux";
 
-export default function home() {
-  const [data, setData] = useState(null);
-
-  const handleClick = async () => {
-    try {
-      const res = await api.get("/users/dashboard-users");
-      setData(res);
-    } catch (error) {
-      setData(error);
-    }
-  };
-
+export default function Home() {
+  const { user } = useSelector((state) => state.user);
   return (
     <div className="text-4xl">
-      <h1>Admin</h1>
-      <Button onClick={handleClick}>Get All Users</Button>
-      <div>{data}</div>
+      <h1>{`Welcome ${user.name}`}</h1>
     </div>
   );
 }

@@ -2,19 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Button, TextInput, Popover, Modal } from "flowbite-react";
 import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
 
 export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.user);
   const [isFormValid, setIsFormValid] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
-
+  const [formErrors, setFormErrors] = useState({});
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -22,20 +27,19 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    dispatch(signInStart());
     try {
       const res = await api.post("/auth/login", formData);
       localStorage.setItem("token", res.data.token);
+      dispatch(signInSuccess(res.data.rest));
       navigate("/");
     } catch (error) {
       if (error.response) {
-        setErrors(error.response.data.message);
+        dispatch(signInFailure(error.response.data.message));
       } else {
-        setErrors("Something went wrong");
+        dispatch(signInFailure("Something went wrong"));
       }
       setOpenModal(true);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -46,7 +50,7 @@ export default function Login() {
     if (formData.password.length < 6)
       tempErrors.password = "Password must be at least 6 characters";
 
-    setErrors(tempErrors);
+    setFormErrors(tempErrors);
     setIsFormValid(Object.keys(tempErrors).length === 0);
   };
 
@@ -61,11 +65,11 @@ export default function Login() {
         <div className="flex flex-col gap-4">
           <Popover
             content={
-              errors.email && (
-                <span className="text-red-400 mx-2">{errors.email}</span>
+              formErrors.email && (
+                <span className="text-red-400 mx-2">{formErrors.email}</span>
               )
             }
-            open={errors.email}
+            open={formErrors.email}
             placement="right"
           >
             <TextInput
@@ -75,16 +79,16 @@ export default function Login() {
               onChange={handleChange}
               value={formData.email}
               placeholder="Email"
-              color={errors.email ? "failure" : ""}
+              color={formErrors.email ? "failure" : ""}
             />
           </Popover>
           <Popover
             content={
-              errors.password && (
-                <span className="text-red-400 mx-2">{errors.password}</span>
+              formErrors.password && (
+                <span className="text-red-400 mx-2">{formErrors.password}</span>
               )
             }
-            open={errors.password}
+            open={formErrors.password}
             placement="right"
           >
             <TextInput
@@ -94,7 +98,7 @@ export default function Login() {
               onChange={handleChange}
               value={formData.password}
               placeholder="Password"
-              color={errors.password ? "failure" : ""}
+              color={formErrors.password ? "failure" : ""}
             />
           </Popover>
           <div className="text-6xs mr-26">
@@ -117,10 +121,10 @@ export default function Login() {
       </form>
 
       <Modal show={openModal} onClose={() => setOpenModal(false)}>
-        <Modal.Header>{errors ? "Error" : "Success"}</Modal.Header>
+        <Modal.Header>{error ? "Error" : "Success"}</Modal.Header>
         <Modal.Body>
-          {errors ? (
-            <p className="text-red-500">{errors}</p>
+          {error ? (
+            <p className="text-red-500">{error}</p>
           ) : (
             <p className="text-green-500">Account created successfully!</p>
           )}
