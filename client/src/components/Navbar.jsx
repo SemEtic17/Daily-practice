@@ -1,6 +1,10 @@
 import React from "react";
 import { Navbar } from "flowbite-react";
+import { useSelector } from "react-redux";
+import Logout from "./Logout";
+
 export default function Navbarr() {
+  const user = useSelector((state) => state.user);
   return (
     <Navbar fluid className="rounded-3xl mx-auto mb-20">
       <Navbar.Brand href="/" className="ml-5">
@@ -9,12 +13,21 @@ export default function Navbarr() {
         </span>
       </Navbar.Brand>
       <Navbar.Toggle />
-      <Navbar.Collapse className="mr-8">
-        <Navbar.Link href="/" active>
+      <Navbar.Collapse className="flex items-center mr-8 text-white">
+        <Navbar.Link className="self-center" href="/" active>
           Home
         </Navbar.Link>
-        <Navbar.Link href="/login">Login</Navbar.Link>
-        <Navbar.Link href="/signup">Signup</Navbar.Link>
+        {!user && (
+          <>
+            <Navbar.Link className="self-center" href="/login">
+              Login
+            </Navbar.Link>
+            <Navbar.Link className="self-center" href="/signup">
+              Signup
+            </Navbar.Link>
+          </>
+        )}
+        {user && <Logout />}
       </Navbar.Collapse>
     </Navbar>
   );
