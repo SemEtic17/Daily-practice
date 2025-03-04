@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import Logout from "./Logout";
 
 export default function Navbarr() {
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user?.user);
   return (
     <Navbar fluid className="rounded-3xl mx-auto mb-20">
       <Navbar.Brand href="/" className="ml-5">
@@ -17,7 +17,7 @@ export default function Navbarr() {
         <Navbar.Link className="self-center" href="/" active>
           Home
         </Navbar.Link>
-        {!user && (
+        {!user ? (
           <>
             <Navbar.Link className="self-center" href="/login">
               Login
@@ -26,8 +26,9 @@ export default function Navbarr() {
               Signup
             </Navbar.Link>
           </>
+        ) : (
+          <Logout />
         )}
-        {user && <Logout />}
       </Navbar.Collapse>
     </Navbar>
   );
